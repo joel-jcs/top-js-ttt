@@ -21,8 +21,6 @@
 
 const setGameBoard = (function () {
     const gameboard = {
-        row: [1, 2, 3],
-        column: [1, 2, 3],
         cells: [1, 2, 3, 4, 5, 6, 7, 8, 9],
     };
 
@@ -37,32 +35,54 @@ const createPlayer = (name, mark) => {
     return { name, mark, selections };
 };
 
-const getPlayerInfo = function () {
-    playerName = prompt("Enter your name: ");
-    playerMark = prompt("Enter your choice: ");
-
-    return { playerName, playerMark };
-};
-
-console.log(playerName, playerMark);
-
 const getCpuSelection = () => {
     let selection = Math.ceil(Math.random() * 9);
     return selection;
 };
 
-console.log(getCpuSelection());
+getPlayerSelection = () => {
+    let selectedRow = prompt("Select a row (1-3): ");    
+    let selectedCol = prompt("Select a column (1-3): ");
+    let selection = 0;
 
-console.getPlayerSelection = () => {
-    let selectedRow = console.prompt("Select a row (1-3): ");    
-    let selectedCol = console.prompt("Select a column (1-3): ");
+    switch (parseInt(selectedRow + selectedCol)) {
+        case 11:
+        case 12:
+        case 13:
+        case 23:
+        case 33:
+            selection = selectedRow * selectedCol;
+            break;
+        case 21:
+            selection = 4;
+            break;
+        case 22:
+            selection = 5;
+            break;
+        case 31:
+            selection = 7;
+            break;
+        case 32:
+            selection = 8;
+            break;
+    }
+
+    return selection;
 };
 
-const gameflow = () => {
-    getPlayerInfo();
-    createPlayer(playerName, playerMark);
+const gameflow = (function () {
+    const playerName = prompt("Enter your name: ");
+    const playerMark = prompt("Enter your choice: ");
+    const player1 = createPlayer(playerName, playerMark);
+    console.log(player1);
+    
+    let selection = getPlayerSelection();
+    console.log(selection);
+
+
+
     let cpuMark = playerMark === "x" ? "o" : "x";
-};
+})();
 
 // let selection = 0;
 // switch (gameboard) {
