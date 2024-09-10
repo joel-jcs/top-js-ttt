@@ -117,10 +117,16 @@ const playGame = (function () {
             }
         }
     }
+
+    if (!player1.isWinner && !player2.isWinner) {
+        alert("The game ended in a tie.");
+    }
 })();
 
 
-//function to restart game
+
+
+//function to restart game / clear up all selections, remainingcells, and boardstate.
 //clear up both player selections
 //nice to have: select number of human players (max = 2) and let them play together
 //nice to have: play multiple rounds
