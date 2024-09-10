@@ -46,14 +46,23 @@ getPlayerSelection = () => {
     let row1 = boardState.slice(0, 3);
     let row2 = boardState.slice(3, 6);
     let row3 = boardState.slice(6, 9);
-    selection = prompt(`
-        Type in the number that corresponds to the cell you want to mark: 
-        ${row1}
-        ${row2}
-        ${row3}
-    `);
+    
+    const selectionPrompt = () => {
+        selection = prompt(`
+            Type in the number that corresponds to the cell you want to mark: 
+            ${row1}
+            ${row2}
+            ${row3}
+        `);
 
-    // TO-DO ADD CONDITION THAT PLAYER CAN'T SELECT ONE IF IT ISNT WITHIN THE REMAINING CELLS
+        if (!gameboard.getRemainingCells().includes(parseInt(selection))) {
+            alert("That cell has already been marked. Please type the number of a cell that hasn't been marked");
+            selectionPrompt();
+        }
+        return selection;
+    }
+
+    selection = selectionPrompt();
     console.log("Player Selection: " + selection);
 
     return selection;
