@@ -5,13 +5,21 @@ const gameboard = (function () {
     const updateRemainingCells = (filtering) => {
         remainingCells = remainingCells.filter(filtering);
         console.table("remaining cells: ", remainingCells);
-    }
+    };
+
+    let boardState = cells.map(cell => cell);
+    const getBoardState = () => boardState;
+    const updateBoardState = (playerSelections, playerMark) => {
+        boardState.map((cell, index) => boardState[index] = playerSelections.includes(cell) ? playerMark : cell);
+        console.table("board state: ", boardState);
+    };
 
     return  {
         cells,
-        remainingCells,
         getRemainingCells,
         updateRemainingCells,
+        getBoardState,
+        updateBoardState,
     };
 })();
 
@@ -34,13 +42,18 @@ const getCpuSelection = () => {
 
 getPlayerSelection = () => {
     let selection = 0;
+    let boardState = gameboard.getBoardState();
+    let row1 = boardState.slice(0, 3);
+    let row2 = boardState.slice(3, 6);
+    let row3 = boardState.slice(6, 9);
     selection = prompt(`
         Type in the number that corresponds to the cell you want to mark: 
-        _(1) _(2) _(3)
-        _(4) _(5) _(6)
-        _(7) _(8) _(9)
+        ${row1}
+        ${row2}
+        ${row3}
     `);
 
+    // TO-DO ADD CONDITION THAT PLAYER CAN'T SELECT ONE IF IT ISNT WITHIN THE REMAINING CELLS
     console.log("Player Selection: " + selection);
 
     return selection;
@@ -50,16 +63,63 @@ const gameflow = (function () {
     const playerName = prompt("Enter your name: ");
     const playerMark = prompt("Enter your choice: ");
     const player1 = createPlayer(playerName, playerMark);
+    console.log("Player Mark: ", player1.mark);
 
     let cpuMark = playerMark === "x" ? "o" : "x";
     const player2 = createPlayer("CPU", cpuMark);
+    console.log("CPU Mark: ", player2.mark)
+
+    //TO-DO: TURN INTO A WHILE LOOP TO AVOID REPETITION
+    //turn 1
+    setTimeout(() => {
+        player1.selections.push(parseInt(getPlayerSelection()));
+        gameboard.updateRemainingCells(cell => !player1.selections.includes(cell));
+        gameboard.updateBoardState(player1.selections, player1.mark);
+
+
+        player2.selections.push(getCpuSelection());
+        gameboard.updateRemainingCells(cell => !player2.selections.includes(cell));
+        gameboard.updateBoardState(player2.selections, player2.mark);
+    }, 3000);
+
+    //turn 2
+    setTimeout(() => {
+        player1.selections.push(parseInt(getPlayerSelection()));
+        gameboard.updateRemainingCells(cell => !player1.selections.includes(cell));
+        gameboard.updateBoardState(player1.selections, player1.mark);
+
+
+        player2.selections.push(getCpuSelection());
+        gameboard.updateRemainingCells(cell => !player2.selections.includes(cell));
+        gameboard.updateBoardState(player2.selections, player2.mark);
+    }, 3000);
     
-    player1.selections.push(parseInt(getPlayerSelection()));
-    gameboard.updateRemainingCells(cell => !player1.selections.includes(cell));
 
-    player2.selections.push(getCpuSelection());
-    gameboard.updateRemainingCells(cell => !player2.selections.includes(cell));
 
+    // turn 3
+    setTimeout(() => {
+        player1.selections.push(parseInt(getPlayerSelection()));
+        gameboard.updateRemainingCells(cell => !player1.selections.includes(cell));
+        gameboard.updateBoardState(player1.selections, player1.mark);
+
+
+        player2.selections.push(getCpuSelection());
+        gameboard.updateRemainingCells(cell => !player2.selections.includes(cell));
+        gameboard.updateBoardState(player2.selections, player2.mark);
+    }, 3000);
+
+    
+    // turn 4
+    setTimeout(() => {
+        player1.selections.push(parseInt(getPlayerSelection()));
+        gameboard.updateRemainingCells(cell => !player1.selections.includes(cell));
+        gameboard.updateBoardState(player1.selections, player1.mark);
+
+
+        player2.selections.push(getCpuSelection());
+        gameboard.updateRemainingCells(cell => !player2.selections.includes(cell));
+        gameboard.updateBoardState(player2.selections, player2.mark);
+    }, 3000);
 })();
 
 
