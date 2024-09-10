@@ -1,30 +1,18 @@
-//Try to go full on OOP
+const gameboard = (function () {
+    const cells = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+    let remainingCells = cells.map(cell => cell);
+    const getRemainingCells = () => remainingCells;
+    const updateRemainingCells = (filtering) => {
+        remainingCells = remainingCells.filter(filtering);
+        console.table("remaining cells: ", remainingCells);
+    }
 
-//store gameboard as an array inside of a gameboard object
-
-// players will be stored in objects
-
-// object to control flow of the game
-
-// as least global variables/code as possible -- try to use factories for everything
-//if you only need 1 instance of something (ex gameboard), insta invoke it by wrapping in IIFE (module)
-
-
-//1 - make the game console first
-// check when game is over
-
-// 2- after it works in console, start with DOM handling (html/css). do this in a OBJECT
-
-//3 - write functions so players can add marks on the board (preventing adding when spot already taken)
-
-// 4- clean up ui + let players put their names + include button to start/restart
-
-const setGameBoard = (function () {
-    const gameboard = {
-        cells: [1, 2, 3, 4, 5, 6, 7, 8, 9],
+    return  {
+        cells,
+        remainingCells,
+        getRemainingCells,
+        updateRemainingCells,
     };
-
-    return gameboard;
 })();
 
 const createPlayer = (name, mark) => {
@@ -36,36 +24,24 @@ const createPlayer = (name, mark) => {
 };
 
 const getCpuSelection = () => {
-    let selection = Math.ceil(Math.random() * 9);
+    const remainingCells = gameboard.getRemainingCells();
+    console.log(remainingCells);
+    let index = Math.floor(Math.random() * remainingCells.length);
+    let selection = remainingCells[index];
+    console.log("CPU Selection: " + selection);
     return selection;
 };
 
 getPlayerSelection = () => {
-    let selectedRow = prompt("Select a row (1-3): ");    
-    let selectedCol = prompt("Select a column (1-3): ");
     let selection = 0;
+    selection = prompt(`
+        Type in the number that corresponds to the cell you want to mark: 
+        _(1) _(2) _(3)
+        _(4) _(5) _(6)
+        _(7) _(8) _(9)
+    `);
 
-    switch (parseInt(selectedRow + selectedCol)) {
-        case 11:
-        case 12:
-        case 13:
-        case 23:
-        case 33:
-            selection = selectedRow * selectedCol;
-            break;
-        case 21:
-            selection = 4;
-            break;
-        case 22:
-            selection = 5;
-            break;
-        case 31:
-            selection = 7;
-            break;
-        case 32:
-            selection = 8;
-            break;
-    }
+    console.log("Player Selection: " + selection);
 
     return selection;
 };
@@ -74,34 +50,20 @@ const gameflow = (function () {
     const playerName = prompt("Enter your name: ");
     const playerMark = prompt("Enter your choice: ");
     const player1 = createPlayer(playerName, playerMark);
-    console.log(player1);
-    
-    let selection = getPlayerSelection();
-    console.log(selection);
-
-
 
     let cpuMark = playerMark === "x" ? "o" : "x";
+    const player2 = createPlayer("CPU", cpuMark);
+    
+    player1.selections.push(parseInt(getPlayerSelection()));
+    gameboard.updateRemainingCells(cell => !player1.selections.includes(cell));
+
+    player2.selections.push(getCpuSelection());
+    gameboard.updateRemainingCells(cell => !player2.selections.includes(cell));
+
 })();
 
-// let selection = 0;
-// switch (gameboard) {
-//     case row[0] === 1 && column[0] === 1:
-//         selection = 1;
-//     case row[0] === 1 && column[0] === 1:
-//         selection = 1;
-// }
 
-//function to select the cell
-//to determine the cell to select, player will pick a row and a column
-//ex if column2 row2, cell = 5
-//selected target will be:
-
-//function to store each player's selections
-//when player selects, push their selected cell# to an array
 
 //function to restart game
 //clear up both player selections
 //nice to have: count games won by each player
-
-// console.table(setGameBoard());
