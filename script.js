@@ -59,7 +59,7 @@ getPlayerSelection = () => {
     return selection;
 };
 
-const gameflow = (function () {
+const playGame = (function () {
     const playerName = prompt("Enter your name: ");
     const playerMark = prompt("Enter your choice: ");
     const player1 = createPlayer(playerName, playerMark);
@@ -67,59 +67,20 @@ const gameflow = (function () {
 
     let cpuMark = playerMark === "x" ? "o" : "x";
     const player2 = createPlayer("CPU", cpuMark);
-    console.log("CPU Mark: ", player2.mark)
+    console.log("CPU Mark: ", player2.mark);
 
-    //TO-DO: TURN INTO A WHILE LOOP TO AVOID REPETITION
-    //turn 1
-    setTimeout(() => {
-        player1.selections.push(parseInt(getPlayerSelection()));
-        gameboard.updateRemainingCells(cell => !player1.selections.includes(cell));
-        gameboard.updateBoardState(player1.selections, player1.mark);
+    const playTurn = (player) => {
+        player.selections.push(player === player1 ? parseInt(getPlayerSelection()) : getCpuSelection());
+        gameboard.updateRemainingCells(cell => !player.selections.includes(cell));
+        gameboard.updateBoardState(player.selections, player.mark);
+    }
 
-
-        player2.selections.push(getCpuSelection());
-        gameboard.updateRemainingCells(cell => !player2.selections.includes(cell));
-        gameboard.updateBoardState(player2.selections, player2.mark);
-    }, 3000);
-
-    //turn 2
-    setTimeout(() => {
-        player1.selections.push(parseInt(getPlayerSelection()));
-        gameboard.updateRemainingCells(cell => !player1.selections.includes(cell));
-        gameboard.updateBoardState(player1.selections, player1.mark);
-
-
-        player2.selections.push(getCpuSelection());
-        gameboard.updateRemainingCells(cell => !player2.selections.includes(cell));
-        gameboard.updateBoardState(player2.selections, player2.mark);
-    }, 3000);
-    
-
-
-    // turn 3
-    setTimeout(() => {
-        player1.selections.push(parseInt(getPlayerSelection()));
-        gameboard.updateRemainingCells(cell => !player1.selections.includes(cell));
-        gameboard.updateBoardState(player1.selections, player1.mark);
-
-
-        player2.selections.push(getCpuSelection());
-        gameboard.updateRemainingCells(cell => !player2.selections.includes(cell));
-        gameboard.updateBoardState(player2.selections, player2.mark);
-    }, 3000);
-
-    
-    // turn 4
-    setTimeout(() => {
-        player1.selections.push(parseInt(getPlayerSelection()));
-        gameboard.updateRemainingCells(cell => !player1.selections.includes(cell));
-        gameboard.updateBoardState(player1.selections, player1.mark);
-
-
-        player2.selections.push(getCpuSelection());
-        gameboard.updateRemainingCells(cell => !player2.selections.includes(cell));
-        gameboard.updateBoardState(player2.selections, player2.mark);
-    }, 3000);
+    while (gameboard.getRemainingCells().length > 0) {
+        playTurn(player1);
+        if (gameboard.getRemainingCells().length > 0) {
+            playTurn(player2);
+        }
+    }
 })();
 
 
