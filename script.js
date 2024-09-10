@@ -4,14 +4,12 @@ const gameboard = (function () {
     const getRemainingCells = () => remainingCells;
     const updateRemainingCells = (filtering) => {
         remainingCells = remainingCells.filter(filtering);
-        console.table("remaining cells: ", remainingCells);
     };
 
     let boardState = cells.map(cell => cell);
     const getBoardState = () => boardState;
     const updateBoardState = (playerSelections, playerMark) => {
         boardState.map((cell, index) => boardState[index] = playerSelections.includes(cell) ? playerMark : cell);
-        console.table("board state: ", boardState);
     };
 
     return  {
@@ -27,13 +25,13 @@ const createPlayer = (name, mark) => {
     this.name = name;
     this.mark = mark;
     this.selections = [];
+    this.isWinner = false;
 
-    return { name, mark, selections };
+    return { name, mark, selections, isWinner };
 };
 
 const getCpuSelection = () => {
     const remainingCells = gameboard.getRemainingCells();
-    console.log(remainingCells);
     let index = Math.floor(Math.random() * remainingCells.length);
     let selection = remainingCells[index];
     console.log("CPU Selection: " + selection);
@@ -68,15 +66,32 @@ getPlayerSelection = () => {
     return selection;
 };
 
+const checkWinner = (player) => {
+    let playerSelections = player.selections.sort((a,b) => a - b);
+    console.log(playerSelections);
+
+    const winningCombinations = [
+        [1, 2, 3], [4, 5, 6], [7, 8, 9], // Horizontal
+        [1, 4, 7], [2, 5, 8], [3, 6, 9], // Vertical
+        [1, 5, 9], [3, 5, 7] // Diagonal
+    ];
+
+    winningCombinations.forEach(combination => {
+        if (combination.every(num => playerSelections.includes(num))) {
+            player.isWinner = true;
+            alert(`${player.name} won the game!`);
+            return;
+        }
+    });
+};
+
 const playGame = (function () {
     const playerName = prompt("Enter your name: ");
     const playerMark = prompt("Enter your choice: ");
     const player1 = createPlayer(playerName, playerMark);
-    console.log("Player Mark: ", player1.mark);
 
     let cpuMark = playerMark === "x" ? "o" : "x";
     const player2 = createPlayer("CPU", cpuMark);
-    console.log("CPU Mark: ", player2.mark);
 
     const playTurn = (player) => {
         player.selections.push(player === player1 ? parseInt(getPlayerSelection()) : getCpuSelection());
@@ -85,15 +100,28 @@ const playGame = (function () {
     }
 
     while (gameboard.getRemainingCells().length > 0) {
+        if (player1.isWinner || player2.isWinner) {
+            console.table(player1.selections);
+            console.table(player2.selections);
+            break;
+        }
+
         playTurn(player1);
+        if (player1.selections.length > 2) {
+            checkWinner(player1);
+        }
         if (gameboard.getRemainingCells().length > 0) {
             playTurn(player2);
+            if (player2.selections.length > 2) {
+                checkWinner(player2);
+            }
         }
     }
 })();
 
 
-
 //function to restart game
 //clear up both player selections
+//nice to have: select number of human players (max = 2) and let them play together
+//nice to have: play multiple rounds
 //nice to have: count games won by each player
