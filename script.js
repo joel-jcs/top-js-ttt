@@ -21,6 +21,16 @@ const gameboard = (function () {
     };
 })();
 
+const getPlayerQty = () => {
+    const playerQty = prompt("Type the number of players (1 or 2): ");
+    if ((parseInt(playerQty) !== 1 && parseInt(playerQty) !== 2)) {
+        alert("You can only choose 1 or 2 players. Try again.");
+        getPlayerQty();
+    } else {
+        return playerQty;
+    }
+}
+
 const createPlayer = (name, mark) => {
     this.name = name;
     this.mark = mark;
@@ -30,15 +40,37 @@ const createPlayer = (name, mark) => {
     return { name, mark, selections, isWinner };
 };
 
+const setPlayers = (playerQty) => {
+
+    const createPlayer1 = () => {
+        let player1Name = prompt("Enter the name of the first player (Player 1): ");
+        let player1Mark = prompt("Choose a mark (X or O): ");
+        let player1 = createPlayer(player1Name, player1Mark.toLowerCase());
+        return player1;
+    };
+    
+    let player1 = createPlayer1();
+    
+    //player 2 set to CPU if the user selected 1 player. If 2 players, gets name from player2;
+    const createPlayer2 = () => {
+        let player2Mark = player1.mark === "x" ? "o" : "x";
+        let player2;
+        playerQty < 2 ? player2 = createPlayer("CPU", player2Mark) : player2 = createPlayer(prompt("Enter the name of the second player (Player 2): "), player2Mark);
+        return player2;
+    }
+    
+    let player2 = createPlayer2();
+
+    return { player1, player2 };
+};
+
 const getCpuSelection = () => {
     const remainingCells = gameboard.getRemainingCells();
     let index = Math.floor(Math.random() * remainingCells.length);
-    let selection = remainingCells[index];
-    console.log("CPU Selection: " + selection);
-    return selection;
+    return remainingCells[index];
 };
 
-getPlayerSelection = () => {
+const getPlayerSelection = (player) => {
     let selection = 0;
     let boardState = gameboard.getBoardState();
     let row1 = boardState.slice(0, 3);
@@ -47,6 +79,8 @@ getPlayerSelection = () => {
     
     const selectionPrompt = () => {
         selection = prompt(`
+            It's ${player.name}'s turn to play. 
+            
             Type in the number that corresponds to the cell you want to mark: 
             ${row1}
             ${row2}
@@ -59,11 +93,7 @@ getPlayerSelection = () => {
         }
         return selection;
     }
-
-    selection = selectionPrompt();
-    console.log("Player Selection: " + selection);
-
-    return selection;
+    return selectionPrompt();
 };
 
 const checkWinner = (player) => {
@@ -86,15 +116,17 @@ const checkWinner = (player) => {
 };
 
 const playGame = (function () {
-    const playerName = prompt("Enter your name: ");
-    const playerMark = prompt("Enter your choice: ");
-    const player1 = createPlayer(playerName, playerMark);
-
-    let cpuMark = playerMark === "x" ? "o" : "x";
-    const player2 = createPlayer("CPU", cpuMark);
+    let playerQty = getPlayerQty();
+    
+    let { player1, player2 } = setPlayers(playerQty);
+    console.log(player1, player2);
 
     const playTurn = (player) => {
-        player.selections.push(player === player1 ? parseInt(getPlayerSelection()) : getCpuSelection());
+        if (playerQty < 2) {
+            player.selections.push(player === player1 ? parseInt(getPlayerSelection(player)) : getCpuSelection());
+        } else {
+            player.selections.push(parseInt(getPlayerSelection(player)));
+        }
         gameboard.updateRemainingCells(cell => !player.selections.includes(cell));
         gameboard.updateBoardState(player.selections, player.mark);
     }
@@ -110,7 +142,7 @@ const playGame = (function () {
         if (player1.selections.length > 2) {
             checkWinner(player1);
         }
-        if (gameboard.getRemainingCells().length > 0) {
+        if (gameboard.getRemainingCells().length > 0 && !player1.isWinner) {
             playTurn(player2);
             if (player2.selections.length > 2) {
                 checkWinner(player2);
@@ -125,7 +157,7 @@ const playGame = (function () {
 
 
 
-
+//move all player functions into a a players factory function 
 //function to restart game / clear up all selections, remainingcells, and boardstate.
 //clear up both player selections
 //nice to have: select number of human players (max = 2) and let them play together
