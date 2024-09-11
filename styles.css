@@ -4,6 +4,7 @@
     box-sizing: border-box;
     font-family: Verdana, Geneva, Tahoma, sans-serif;
     font-size:16px;
+    transition:ease 0.1s;
 }
 
 body {
@@ -30,7 +31,7 @@ h1 {
     
     padding:30px 40px;
     border-radius: 1rem;
-    background: rgba(255, 255, 255, 0.25);
+    background: rgba(255, 255, 255, 0.9);
     box-shadow: 0 8px 32px 0 rgba( 31, 38, 135, 0.37 );
     backdrop-filter: blur(5px);
 }
@@ -48,10 +49,18 @@ h1 {
     display:flex;
     justify-content: center;
     align-items: center;
+    user-select: none;
+    cursor:pointer;
 }
 
 .mark {
     font-size:4rem;
     text-align: center;
     font-weight: bold;
+    opacity:0.5;
+}
+
+.active {
+    display:inherit;
+    opacity:1;
 }

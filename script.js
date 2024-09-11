@@ -47,9 +47,27 @@ const gameUI = (() => {
         const marks = document.querySelectorAll('.mark');
 
         tiles.forEach((tile, index) => {
+            
+                tile.addEventListener('mouseenter', () => {
+                    if (!marks[index].textContent) {
+                        marks[index].textContent = "X";
+                    }
+                });
+    
+                tile.addEventListener('mouseleave', () => {
+                    if (!isClicked) {
+                        marks[index].textContent = "";
+                    }
+                });
+            
+            
+            let isClicked = false;
             tile.addEventListener('click', () => {
-                 marks[index].textContent = "X";
-            })
+                marks[index].textContent = "X";
+                marks[index].classList.add("active");
+                marks[index].classList.remove("hover");
+                isClicked = true;
+            });
         });
     }
 
