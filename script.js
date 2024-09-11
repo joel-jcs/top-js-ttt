@@ -48,7 +48,7 @@ const players = (() => {
     };
 
     const createPlayer = (name, mark) => {
-        return { name, mark, selections: [], isWinner: false };
+        return { name, mark, selections: [], selectionMade:false, isWinner: false };
     };
 
     const setPlayers = (playerQty) => {
@@ -69,36 +69,45 @@ const players = (() => {
         return { player1, player2 };
     };
 
-    const getPlayerSelection = (player) => {
+    const getPlayerSelection = (currPlayer, opponent) => {
         const tiles = document.querySelectorAll('.tile');
         const marks = document.querySelectorAll('.mark');
-
+        
+        let isMarked = false;
         tiles.forEach((tile, index) => {
-            let isClicked = false;
+            
 
-            tile.addEventListener('mouseenter', () => {
-                if (!marks[index].textContent) {
-                    marks[index].textContent = `${player.mark}`;
-                }
-            });
+            // tile.addEventListener('mouseenter', () => {
+            //     if (!marks[index].textContent) {
+            //         marks[index].textContent = `${currPlayer.mark}`;
+            //     }
+            // });
 
-            tile.addEventListener('mouseleave', () => {
-                if (!isClicked) {
-                    marks[index].textContent = "";
-                }
-            });
-
+            // tile.addEventListener('mouseleave', () => {
+            //     if (!isMarked) {
+            //         marks[index].textContent = "";
+            //     }
+            // });
             tile.addEventListener('click', () => {
-                if (gameboard.getRemainingCells().includes(index+1)) {
-                    player.selections.push(index+1);
-                    marks[index].textContent = `${player.mark}`;
-                    marks[index].classList.add("active");
-                    marks[index].classList.remove("hover");
-                    isClicked = true;
-                } else {
-                    alert("That cell is already selected. Try again.");
+                if (!isMarked){
+                    if (gameboard.getRemainingCells().includes(index+1)) {
+                        currPlayer.selections.push(index+1);
+                        currPlayer.selectionMade = !currPlayer.selectionMade;
+                        opponent.selectionMade = false;
+                        isMarked = true;
+    
+                        gameboard.updateRemainingCells(cell => !currPlayer.selections.includes(cell));
+                        marks[index].textContent = `${currPlayer.mark}`;
+                        marks[index].classList.add("active");
+                        marks[index].classList.remove("hover");
+                        
+                        console.log(currPlayer.selections);
+                        playGame.playTurn();
+    
+                    } else {
+                        alert("That cell is already selected. Try again.");
+                    }
                 }
-                console.log(player.selections);
             });
         });
     }
@@ -147,51 +156,49 @@ const players = (() => {
 
 const playGame = (function () {
     // let playerQty = players.getPlayerQty();
-    // console.log(player1, player2);
     
     // testing
     let playerQty = 2;
     let { player1, player2 } = players.setPlayers(playerQty);
+    console.log(player1, player2);
 
     gameUI.setTileContainer();
+    
+    const playTurn = () => {
+        if (!player1.selectionMade) {
+            console.log("player1 selecting...")
+            players.getPlayerSelection(player1, player2);
+        } else {
+            console.log("player2 selecting...")
+            players.getPlayerSelection(player2, player1);
+        }
+    };
 
-    const playTurn = ((player) => {
-        // if (playerQty < 2) {
-        //     player.selections.push(player === player1 ? parseInt(players.getPlayerSelection(player)) : players.getCpuSelection());
-        // } else {
-        //     player.selections.push(parseInt(players.getPlayerSelection(player)));
-        // }
-        // 
-        // gameboard.updateBoardState(player.selections, player.mark);
-        
-        
-        players.getPlayerSelection(player1);
-        gameboard.updateRemainingCells(cell => !player1.selections.includes(cell));
-    })();
+    playTurn()
 
     const playGame = () => {
-        while (gameboard.getRemainingCells().length > 0) {
-            if (player1.isWinner || player2.isWinner) {
-                console.table(player1.selections);
-                console.table(player2.selections);
-                break;
-            }
+        // while (gameboard.getRemainingCells().length > 0) {
+        //     if (player1.isWinner || player2.isWinner) {
+        //         console.table(player1.selections);
+        //         console.table(player2.selections);
+        //         break;
+        //     }
     
             playTurn(player1);
-            if (player1.selections.length > 2) {
-                players.checkWinner(player1);
-            }
+            // if (player1.selections.length > 2) {
+            //     players.checkWinner(player1);
+            // }
             if (gameboard.getRemainingCells().length > 0 && !player1.isWinner) {
                 playTurn(player2);
                 if (player2.selections.length > 2) {
                     players.checkWinner(player2);
                 }
             }
-        }
+        // }
 
-        if (!player1.isWinner && !player2.isWinner) {
-            alert("The game ended in a tie.");
-        }
+        // if (!player1.isWinner && !player2.isWinner) {
+        //     alert("The game ended in a tie.");
+        // }
 
         // const restartGame = () => {
         //     gameboard.clearBoard();
@@ -212,5 +219,10 @@ const playGame = (function () {
         //     return;
         // }
     }
+    
     // playGame();
+
+    return {
+        playTurn,
+    }
 })();
