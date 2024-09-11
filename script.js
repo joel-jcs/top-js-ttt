@@ -13,12 +13,18 @@ const gameboard = (() => {
         boardState.map((cell, index) => boardState[index] = playerSelections.includes(cell) ? playerMark : cell);
     };
 
+    const clearBoard = () => {
+        remainingCells = cells.map(cell => cell);
+        boardState = cells.map(cell => cell);
+    };
+
     return  {
         cells,
         getRemainingCells,
         updateRemainingCells,
         getBoardState,
         updateBoardState,
+        clearBoard,
     };
 })();
 
@@ -31,15 +37,10 @@ const players = (() => {
         } else {
             return playerQty;
         }
-    }
+    };
 
     const createPlayer = (name, mark) => {
-        this.name = name;
-        this.mark = mark;
-        this.selections = [];
-        this.isWinner = false;
-    
-        return { name, mark, selections, isWinner };
+        return { name, mark, selections: [], isWinner: false };
     };
 
     const setPlayers = (playerQty) => {
@@ -56,7 +57,7 @@ const players = (() => {
 
     const getPlayerSelection = (player) => {
         let selection = 0;
-        let boardState = gameboard.getBoardState();
+        const boardState = gameboard.getBoardState();
         let row1 = boardState.slice(0, 3);
         let row2 = boardState.slice(3, 6);
         let row3 = boardState.slice(6, 9);
@@ -70,7 +71,12 @@ const players = (() => {
                 ${row2}
                 ${row3}
             `);
-    
+                
+            if (!parseInt(selection) || parseInt(selection) < 1 || parseInt(selection) > 9) {
+                alert("Please type a number");
+                selectionPrompt();
+            }
+
             if (!gameboard.getRemainingCells().includes(parseInt(selection))) {
                 alert("That cell has already been marked. Please type the number of a cell that hasn't been marked");
                 selectionPrompt();
@@ -105,6 +111,10 @@ const players = (() => {
         });
     };
 
+    const clearSelections = () => {
+        player1.selections = [];
+    }
+
     return { 
         getPlayerQty,
         createPlayer,
@@ -112,6 +122,7 @@ const players = (() => {
         getPlayerSelection,
         getCpuSelection,
         checkWinner,
+        clearSelections,
     }
 })();
 
@@ -131,32 +142,48 @@ const playGame = (function () {
         gameboard.updateBoardState(player.selections, player.mark);
     }
 
-    while (gameboard.getRemainingCells().length > 0) {
-        if (player1.isWinner || player2.isWinner) {
-            console.table(player1.selections);
-            console.table(player2.selections);
-            break;
-        }
-
-        playTurn(player1);
-        if (player1.selections.length > 2) {
-            players.checkWinner(player1);
-        }
-        if (gameboard.getRemainingCells().length > 0 && !player1.isWinner) {
-            playTurn(player2);
-            if (player2.selections.length > 2) {
-                players.checkWinner(player2);
+    const playGame = () => {
+        while (gameboard.getRemainingCells().length > 0) {
+            if (player1.isWinner || player2.isWinner) {
+                console.table(player1.selections);
+                console.table(player2.selections);
+                break;
+            }
+    
+            playTurn(player1);
+            if (player1.selections.length > 2) {
+                players.checkWinner(player1);
+            }
+            if (gameboard.getRemainingCells().length > 0 && !player1.isWinner) {
+                playTurn(player2);
+                if (player2.selections.length > 2) {
+                    players.checkWinner(player2);
+                }
             }
         }
-    }
 
-    if (!player1.isWinner && !player2.isWinner) {
-        alert("The game ended in a tie.");
+        if (!player1.isWinner && !player2.isWinner) {
+            alert("The game ended in a tie.");
+        }
+
+        const restartGame = () => {
+            gameboard.clearBoard();
+            player1.isWinner = false;
+            player2.isWinner = false;
+            player1.selections = [];
+            player2.selections = [];
+    
+            playGame();
+        }
+
+        let restart = prompt("Would you like to play again? (y/n) ");
+        if (restart.toLowerCase().match(/y|yes/i)) {
+            restartGame();
+        } else if (restart.toLowerCase().match(/n|no/i)) {
+            alert("Thanks for playing!")
+        } else {
+            return;
+        }
     }
+    playGame();
 })();
-
-
-
-//function to restart game / clear up all selections, remainingcells, and boardstate.
-//clear up both player selections
-//nice to have: count games won by each player
