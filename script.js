@@ -42,28 +42,27 @@ const gameUI = (() => {
         })
     }
 
-    const selectTile = () => {
+    const selectTile = (player) => {
         const tiles = document.querySelectorAll('.tile');
         const marks = document.querySelectorAll('.mark');
 
         tiles.forEach((tile, index) => {
-            
-                tile.addEventListener('mouseenter', () => {
-                    if (!marks[index].textContent) {
-                        marks[index].textContent = "X";
-                    }
-                });
-    
-                tile.addEventListener('mouseleave', () => {
-                    if (!isClicked) {
-                        marks[index].textContent = "";
-                    }
-                });
-            
-            
             let isClicked = false;
+
+            tile.addEventListener('mouseenter', () => {
+                if (!marks[index].textContent) {
+                    marks[index].textContent = `${player.mark}`;
+                }
+            });
+
+            tile.addEventListener('mouseleave', () => {
+                if (!isClicked) {
+                    marks[index].textContent = "";
+                }
+            });
+            
             tile.addEventListener('click', () => {
-                marks[index].textContent = "X";
+                marks[index].textContent = `${player.mark}`;
                 marks[index].classList.add("active");
                 marks[index].classList.remove("hover");
                 isClicked = true;
@@ -90,13 +89,19 @@ const players = (() => {
     };
 
     const setPlayers = (playerQty) => {
-        let player1Name = prompt("Enter the name of the first player (Player 1): ");
-        let player1Mark = prompt("Choose a mark (X or O): ");
-        let player1 = createPlayer(player1Name, player1Mark.toLowerCase());
+        // let player1Name = prompt("Enter the name of the first player (Player 1): ");
+        // let player1Mark = prompt("Choose a mark (X or O): ");
+
+        // testing
+        let player1Name = "Joel";
+        let player1Mark = "x";
+
+        let player1 = createPlayer(player1Name, player1Mark.toUpperCase());
 
         //player 2 set to CPU if the user selected 1 player. If 2 players, gets name from player2;
-        let player2Mark = player1.mark === "x" ? "o" : "x";
-        let player2 = playerQty < 2 ? createPlayer("CPU", player2Mark) : createPlayer(prompt("Enter the name of the second player (Player 2): "), player2Mark);
+        let player2Mark = player1.mark === "X" ? "O" : "X";
+        // let player2 = playerQty < 2 ? createPlayer("CPU", player2Mark) : createPlayer(prompt("Enter the name of the second player (Player 2): "), player2Mark);
+        let player2 = playerQty < 2 ? createPlayer("CPU", player2Mark) : createPlayer("Player2", player2Mark);
 
         return { player1, player2 };
     };
@@ -175,11 +180,14 @@ const players = (() => {
 
 const playGame = (function () {
     // let playerQty = players.getPlayerQty();
-    // let { player1, player2 } = players.setPlayers(playerQty);
     // console.log(player1, player2);
+    
+    // testing
+    let playerQty = 2;
+    let { player1, player2 } = players.setPlayers(playerQty);
 
     gameUI.setTileContainer();
-    gameUI.selectTile();
+    gameUI.selectTile(player2);
 
     const playTurn = (player) => {
         if (playerQty < 2) {
