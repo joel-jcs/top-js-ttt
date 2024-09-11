@@ -7,23 +7,14 @@ const gameboard = (() => {
         remainingCells = remainingCells.filter(filtering);
     };
 
-    let boardState = cells.map(cell => cell);
-    const getBoardState = () => boardState;
-    const updateBoardState = (playerSelections, playerMark) => {
-        boardState.map((cell, index) => boardState[index] = playerSelections.includes(cell) ? playerMark : cell);
-    };
-
     const clearBoard = () => {
         remainingCells = cells.map(cell => cell);
-        boardState = cells.map(cell => cell);
     };
 
     return  {
         cells,
         getRemainingCells,
         updateRemainingCells,
-        getBoardState,
-        updateBoardState,
         clearBoard,
     };
 })();
@@ -39,38 +30,10 @@ const gameUI = (() => {
                 <span class="mark"></span>
             </div>
             `
-        })
-    }
-
-    const selectTile = (player) => {
-        const tiles = document.querySelectorAll('.tile');
-        const marks = document.querySelectorAll('.mark');
-
-        tiles.forEach((tile, index) => {
-            let isClicked = false;
-
-            tile.addEventListener('mouseenter', () => {
-                if (!marks[index].textContent) {
-                    marks[index].textContent = `${player.mark}`;
-                }
-            });
-
-            tile.addEventListener('mouseleave', () => {
-                if (!isClicked) {
-                    marks[index].textContent = "";
-                }
-            });
-            
-            tile.addEventListener('click', () => {
-                marks[index].textContent = `${player.mark}`;
-                marks[index].classList.add("active");
-                marks[index].classList.remove("hover");
-                isClicked = true;
-            });
         });
-    }
+    };
 
-    return { setTileContainer, selectTile };
+    return { setTileContainer };
 })();
 
 const players = (() => {
@@ -107,35 +70,38 @@ const players = (() => {
     };
 
     const getPlayerSelection = (player) => {
-        let selection = 0;
-        const boardState = gameboard.getBoardState();
-        let row1 = boardState.slice(0, 3);
-        let row2 = boardState.slice(3, 6);
-        let row3 = boardState.slice(6, 9);
-        
-        const selectionPrompt = () => {
-            selection = prompt(`
-                It's ${player.name}'s turn to play. 
-                
-                Type in the number that corresponds to the cell you want to mark: 
-                ${row1}
-                ${row2}
-                ${row3}
-            `);
-                
-            if (!parseInt(selection) || parseInt(selection) < 1 || parseInt(selection) > 9) {
-                alert("Please type a number");
-                selectionPrompt();
-            }
+        const tiles = document.querySelectorAll('.tile');
+        const marks = document.querySelectorAll('.mark');
 
-            if (!gameboard.getRemainingCells().includes(parseInt(selection))) {
-                alert("That cell has already been marked. Please type the number of a cell that hasn't been marked");
-                selectionPrompt();
-            }
-            return selection;
-        }
-        return selectionPrompt();
-    };
+        tiles.forEach((tile, index) => {
+            let isClicked = false;
+
+            tile.addEventListener('mouseenter', () => {
+                if (!marks[index].textContent) {
+                    marks[index].textContent = `${player.mark}`;
+                }
+            });
+
+            tile.addEventListener('mouseleave', () => {
+                if (!isClicked) {
+                    marks[index].textContent = "";
+                }
+            });
+
+            tile.addEventListener('click', () => {
+                if (gameboard.getRemainingCells().includes(index+1)) {
+                    player.selections.push(index+1);
+                    marks[index].textContent = `${player.mark}`;
+                    marks[index].classList.add("active");
+                    marks[index].classList.remove("hover");
+                    isClicked = true;
+                } else {
+                    alert("That cell is already selected. Try again.");
+                }
+                console.log(player.selections);
+            });
+        });
+    }
 
     const getCpuSelection = () => {
         const remainingCells = gameboard.getRemainingCells();
@@ -162,8 +128,9 @@ const players = (() => {
         });
     };
 
-    const clearSelections = () => {
+    const clearSelections = (player1, player2) => {
         player1.selections = [];
+        player2.selections = [];
     }
 
     return { 
@@ -187,17 +154,20 @@ const playGame = (function () {
     let { player1, player2 } = players.setPlayers(playerQty);
 
     gameUI.setTileContainer();
-    gameUI.selectTile(player2);
 
-    const playTurn = (player) => {
-        if (playerQty < 2) {
-            player.selections.push(player === player1 ? parseInt(players.getPlayerSelection(player)) : players.getCpuSelection());
-        } else {
-            player.selections.push(parseInt(players.getPlayerSelection(player)));
-        }
-        gameboard.updateRemainingCells(cell => !player.selections.includes(cell));
-        gameboard.updateBoardState(player.selections, player.mark);
-    }
+    const playTurn = ((player) => {
+        // if (playerQty < 2) {
+        //     player.selections.push(player === player1 ? parseInt(players.getPlayerSelection(player)) : players.getCpuSelection());
+        // } else {
+        //     player.selections.push(parseInt(players.getPlayerSelection(player)));
+        // }
+        // 
+        // gameboard.updateBoardState(player.selections, player.mark);
+        
+        
+        players.getPlayerSelection(player1);
+        gameboard.updateRemainingCells(cell => !player1.selections.includes(cell));
+    })();
 
     const playGame = () => {
         while (gameboard.getRemainingCells().length > 0) {
@@ -223,15 +193,15 @@ const playGame = (function () {
             alert("The game ended in a tie.");
         }
 
-        const restartGame = () => {
-            gameboard.clearBoard();
-            player1.isWinner = false;
-            player2.isWinner = false;
-            player1.selections = [];
-            player2.selections = [];
+        // const restartGame = () => {
+        //     gameboard.clearBoard();
+        //     player1.isWinner = false;
+        //     player2.isWinner = false;
+        //     player1.selections = [];
+        //     player2.selections = [];
     
-            playGame();
-        }
+        //     playGame();
+        // }
 
         // let restart = prompt("Would you like to play again? (y/n) ");
         // if (restart.toLowerCase().match(/y|yes/i)) {
