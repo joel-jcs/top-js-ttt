@@ -42,7 +42,18 @@ const gameUI = (() => {
         })
     }
 
-    return { setTileContainer };
+    const selectTile = () => {
+        const tiles = document.querySelectorAll('.tile');
+        const marks = document.querySelectorAll('.mark');
+
+        tiles.forEach((tile, index) => {
+            tile.addEventListener('click', () => {
+                 marks[index].textContent = "X";
+            })
+        });
+    }
+
+    return { setTileContainer, selectTile };
 })();
 
 const players = (() => {
@@ -150,6 +161,7 @@ const playGame = (function () {
     // console.log(player1, player2);
 
     gameUI.setTileContainer();
+    gameUI.selectTile();
 
     const playTurn = (player) => {
         if (playerQty < 2) {
