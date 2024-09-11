@@ -28,15 +28,32 @@ const gameboard = (() => {
     };
 })();
 
+const gameUI = (() => {
+    const gameContainer = document.getElementById('game-container');
+    const tileContainer = document.getElementById('tile-container');
+    
+    const setTileContainer = () => {
+        gameboard.cells.forEach(cell => {
+            tileContainer.innerHTML += `
+            <div class="tile">
+                <span class="mark"></span>
+            </div>
+            `
+        })
+    }
+
+    return { setTileContainer };
+})();
+
 const players = (() => {
     const getPlayerQty = () => {
-        // // const playerQty = prompt("Type the number of players (1 or 2): ");
-        // // if ((parseInt(playerQty) !== 1 && parseInt(playerQty) !== 2)) {
-        // //     alert("You can only choose 1 or 2 players. Try again.");
-        // //     getPlayerQty();
-        // } else {
-        //     return playerQty;
-        // }
+        const playerQty = prompt("Type the number of players (1 or 2): ");
+        if ((parseInt(playerQty) !== 1 && parseInt(playerQty) !== 2)) {
+            alert("You can only choose 1 or 2 players. Try again.");
+            getPlayerQty();
+        } else {
+            return playerQty;
+        }
     };
 
     const createPlayer = (name, mark) => {
@@ -44,8 +61,8 @@ const players = (() => {
     };
 
     const setPlayers = (playerQty) => {
-        // let player1Name = prompt("Enter the name of the first player (Player 1): ");
-        // let player1Mark = prompt("Choose a mark (X or O): ");
+        let player1Name = prompt("Enter the name of the first player (Player 1): ");
+        let player1Mark = prompt("Choose a mark (X or O): ");
         let player1 = createPlayer(player1Name, player1Mark.toLowerCase());
 
         //player 2 set to CPU if the user selected 1 player. If 2 players, gets name from player2;
@@ -128,9 +145,11 @@ const players = (() => {
 
 
 const playGame = (function () {
-    let playerQty = players.getPlayerQty();
-    let { player1, player2 } = players.setPlayers(playerQty);
-    console.log(player1, player2);
+    // let playerQty = players.getPlayerQty();
+    // let { player1, player2 } = players.setPlayers(playerQty);
+    // console.log(player1, player2);
+
+    gameUI.setTileContainer();
 
     const playTurn = (player) => {
         if (playerQty < 2) {
@@ -176,14 +195,14 @@ const playGame = (function () {
             playGame();
         }
 
-        let restart = prompt("Would you like to play again? (y/n) ");
-        if (restart.toLowerCase().match(/y|yes/i)) {
-            restartGame();
-        } else if (restart.toLowerCase().match(/n|no/i)) {
-            alert("Thanks for playing!")
-        } else {
-            return;
-        }
+        // let restart = prompt("Would you like to play again? (y/n) ");
+        // if (restart.toLowerCase().match(/y|yes/i)) {
+        //     restartGame();
+        // } else if (restart.toLowerCase().match(/n|no/i)) {
+        //     alert("Thanks for playing!")
+        // } else {
+        //     return;
+        // }
     }
-    playGame();
+    // playGame();
 })();
