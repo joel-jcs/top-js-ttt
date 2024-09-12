@@ -36,6 +36,7 @@ const players = (() => {
         return { name, mark, selections: [], selectionMade: false, isWinner: false };
     };
 
+
     const checkWinner = (player) => {
         let playerSelections = player.selections.sort((a,b) => a - b);
     
@@ -242,7 +243,9 @@ const gameUI = (() => {
         } else {
             gameEndElement.textContent = `The game ended in a tie.`;
         }
-        gameContainer.insertBefore(gameEndElement, tileContainer);
+        gameContainer.innerHTML = `<h1>Tic Tac Toe</h1>`;
+        gameContainer.appendChild(gameEndElement);
+        gameContainer.appendChild(tileContainer);
     }
 
     return { 
