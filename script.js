@@ -73,28 +73,28 @@ const players = (() => {
         const tiles = document.querySelectorAll('.tile');
         const marks = document.querySelectorAll('.mark');
         
-        let isMarked = false;
+        let isClicked = false;
         tiles.forEach((tile, index) => {
             
+            tile.addEventListener('mouseenter', () => {
+                if (!isClicked && !marks[index].textContent) {
+                    marks[index].textContent = `${currPlayer.mark}`;
+                }
+            });
 
-            // tile.addEventListener('mouseenter', () => {
-            //     if (!marks[index].textContent) {
-            //         marks[index].textContent = `${currPlayer.mark}`;
-            //     }
-            // });
+            tile.addEventListener('mouseleave', () => {
+                if (!isClicked && !marks[index].classList.contains('active')) {
+                    marks[index].textContent = "";
+                }
+            });
 
-            // tile.addEventListener('mouseleave', () => {
-            //     if (!isMarked) {
-            //         marks[index].textContent = "";
-            //     }
-            // });
             tile.addEventListener('click', () => {
-                if (!isMarked){
+                if (!isClicked){
                     if (gameboard.getRemainingCells().includes(index+1)) {
                         currPlayer.selections.push(index+1);
                         currPlayer.selectionMade = !currPlayer.selectionMade;
                         opponent.selectionMade = false;
-                        isMarked = true;
+                        isClicked = true;
     
                         gameboard.updateRemainingCells(cell => !currPlayer.selections.includes(cell));
                         marks[index].textContent = `${currPlayer.mark}`;
