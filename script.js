@@ -49,8 +49,7 @@ const players = (() => {
         winningCombinations.forEach(combination => {
             if (combination.every(num => playerSelections.includes(num))) {
                 player.isWinner = true;
-                alert(`${player.name} won the game!`);
-
+                gameUI.endGame(player);
                 return;
             }
         });
@@ -186,7 +185,7 @@ const gameUI = (() => {
                         console.log(currPlayer.selections);
 
                         if (currPlayer.selections.length > 2) {
-                            players.checkWinner(currPlayer);
+                            players.checkWinner(currPlayer, opponent);
                         }
 
                         gameHandler().playTurn(currPlayer, opponent);
@@ -205,12 +204,29 @@ const gameUI = (() => {
         return remainingCells[index];
     };
 
+    const endGame = (player1, player2) => {
+        const gameEndElement = document.createElement('h3');
+
+        let winner;
+        if (player1.isWinner || player2.isWinner) {
+            winner = player1.isWinner ? player1.name : player2.name;    
+        }
+        
+        if (winner) {
+            gameEndElement.textContent = `${winner} is the winner!`;    
+        } else {
+            gameEndElement.textContent = `The game ended in a tie.`;
+        }
+        gameContainer.insertBefore(gameEndElement, tileContainer);
+    }
+
     return { 
         setTileContainer, 
         getPlayerQty, 
         onboardingFlow,
         getPlayerSelection,
         getCpuSelection,
+        endGame,
      };
 })();
 
@@ -218,7 +234,7 @@ const gameHandler = function () {
     
     const playTurn = (player1, player2) => {
         if (gameboard.getRemainingCells().length === 0 && (!player1.isWinner && !player2.isWinner)) {
-            alert("The game ended in a tie.");
+            gameUI.endGame(player1, player2);
         }
 
         if (!player1.selectionMade) {
