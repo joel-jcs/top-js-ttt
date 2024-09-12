@@ -33,19 +33,29 @@ const gameUI = (() => {
         });
     };
 
-    return { setTileContainer };
+    return { tileContainer, setTileContainer };
 })();
 
 const players = (() => {
+    
+    const playerOptionsScreen = document.getElementById('player-options-screen');
+    let playerQty = 0;
     const getPlayerQty = () => {
-        const playerQty = prompt("Type the number of players (1 or 2): ");
-        if ((parseInt(playerQty) !== 1 && parseInt(playerQty) !== 2)) {
-            alert("You can only choose 1 or 2 players. Try again.");
-            getPlayerQty();
-        } else {
-            return playerQty;
-        }
+        const modeSelectScreen = document.getElementById('mode-select-screen');
+        const modeBtn = document.querySelectorAll('.mode-btn');
+        modeBtn.forEach(btn => {
+            btn.addEventListener('click', () => {
+                playerQty = btn.value;
+                modeSelectScreen.style.display = 'none';
+                playerOptionsScreen.style.display = 'flex';
+                console.log(playerQty);
+            })
+        })
+        return playerQty;
     };
+    
+
+
 
     const createPlayer = (name, mark) => {
         return { name, mark, selections: [], selectionMade:false, isWinner: false };
@@ -55,16 +65,60 @@ const players = (() => {
         // let player1Name = prompt("Enter the name of the first player (Player 1): ");
         // let player1Mark = prompt("Choose a mark (X or O): ");
 
-        // testing
-        let player1Name = "Joel";
-        let player1Mark = "x";
+        const player1NameInput = document.getElementById('player1-name');
+        const player2NameInput = document.getElementById('player2-name');
+        const markSelectBtn = document.querySelectorAll('.mark-select-btn');
+        const player1InfoScreen = document.getElementById('player1-info');
+        const player2InfoScreen = document.getElementById('player2-info');
+        const submitPlayer1InfoBtn = document.getElementById('submit-player1-info');
+        const submitPlayer2InfoBtn = document.getElementById('submit-player2-info');
 
-        let player1 = createPlayer(player1Name, player1Mark.toUpperCase());
+        let player1;
+        let player2;
+        let player1Mark = "";
+        let player1Name = "";
+        let player2Mark = "";
+        let player2Name = "";
+        markSelectBtn.forEach(btn => {
+            btn.addEventListener('click', () => {
+                if (btn.id === 'X') {
+                    player1Mark = 'X';
+                } else {
+                    player1Mark = 'O';
+                }
+                console.log(player1Mark);
+            })
+        })
+
+        submitPlayer1InfoBtn.addEventListener('click', () => {
+            if (player1NameInput.value === "") {
+                player1NameInput.value = "Player1";
+            }
+            player1Name = player1NameInput.value;
+            player1 = createPlayer(player1Name, player1Mark);
+            player1InfoScreen.style.display = 'none';
+            player2InfoScreen.style.display = 'grid';
+            console.table(player1);
+        })
+
+        submitPlayer2InfoBtn.addEventListener('click', () => {
+            if (player2NameInput.value === "") {
+                player2NameInput.value = "Player2";
+            }
+            player2Name = player2NameInput.value;
+            player2InfoScreen.style.display = 'none';
+            player2Mark = player1.mark === "X" ? "O" : "X";
+            player2 = createPlayer(player2Name, player2Mark);
+            playerOptionsScreen.style.display = 'none';
+            gameUI.tileContainer.style.display = 'grid';
+            gameUI.setTileContainer();
+            console.table(player2);
+        })
 
         //player 2 set to CPU if the user selected 1 player. If 2 players, gets name from player2;
-        let player2Mark = player1.mark === "X" ? "O" : "X";
+        
         // let player2 = playerQty < 2 ? createPlayer("CPU", player2Mark) : createPlayer(prompt("Enter the name of the second player (Player 2): "), player2Mark);
-        let player2 = playerQty < 2 ? createPlayer("CPU", player2Mark) : createPlayer("Player2", player2Mark);
+        player2 = playerQty < 2 ? createPlayer("CPU", player2Mark) : createPlayer("Player2", player2Mark);
 
         return { player1, player2 };
     };
@@ -152,29 +206,27 @@ const players = (() => {
         clearSelections,
     }
 })();
-
+players.getPlayerQty();
 
 const playGame = (function () {
-    // let playerQty = players.getPlayerQty();
+    let playerQty = players.getPlayerQty();
     
     // testing
-    let playerQty = 2;
     let { player1, player2 } = players.setPlayers(playerQty);
     console.log(player1, player2);
 
-    gameUI.setTileContainer();
     
-    const playTurn = () => {
-        if (!player1.selectionMade) {
-            console.log("player1 selecting...")
-            players.getPlayerSelection(player1, player2);
-        } else {
-            console.log("player2 selecting...")
-            players.getPlayerSelection(player2, player1);
-        }
-    };
+    // const playTurn = () => {
+    //     if (!player1.selectionMade) {
+    //         console.log("player1 selecting...")
+    //         players.getPlayerSelection(player1, player2);
+    //     } else {
+    //         console.log("player2 selecting...")
+    //         players.getPlayerSelection(player2, player1);
+    //     }
+    // };
 
-    playTurn()
+    // playTurn()
 
     const playGame = () => {
         // while (gameboard.getRemainingCells().length > 0) {
@@ -223,6 +275,6 @@ const playGame = (function () {
     // playGame();
 
     return {
-        playTurn,
+        // playTurn,
     }
 })();

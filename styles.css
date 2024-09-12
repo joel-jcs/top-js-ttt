@@ -22,6 +22,10 @@ h1 {
     font-size:2.5rem;
 }
 
+h2 {
+    font-size:1.5rem;
+}
+
 #game-container {
     display:flex;
     flex-direction: column;
@@ -36,12 +40,164 @@ h1 {
     backdrop-filter: blur(5px);
 }
 
+#mode-select-screen {
+    height:100%;
+    width:100%;
+    display:flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap:20px;
+}
+
+#mode-btn-container {
+    display:flex;
+    align-items: center;
+    justify-content: center;
+    gap:20px;
+}
+
+.mode-btn {
+    font-size:2rem;
+    width:200px;
+    height:200px;
+    padding:10px 20px;
+    border:1px solid black;
+    border-radius: 1rem;
+    cursor:pointer;
+    background-color: rgb(205, 205, 205);
+}
+
+.mode-btn:hover {
+    background-color: rgb(133, 133, 133);
+}
+
+.mode-btn:active {
+    transform: scale(0.95);
+}
+
+#player-options-screen {
+    height:100%;
+    width:100%;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    /* set to flex */
+    display:none; 
+}
+
+#player1-info {
+    display:grid;
+    grid-template-areas:
+    "title title"
+    "label label"
+    "input input"
+    "X O"
+    "submit submit";
+    gap:20px;
+    width:100%;
+    padding:30px;
+}
+
+#player1-info > h3 {
+    grid-area: title;
+    text-align: center;
+    font-size:1.2rem;
+}
+
+#player1-info > label {
+    grid-area: label;
+    font-size:1.1rem;
+    text-align: center;
+}
+
+.player-name-input {
+    grid-area: input;    
+    border-radius:1rem;
+    text-align:center;
+    padding:5px;
+    font-size:1.2rem;
+}
+#x {
+    grid-area: X;
+}
+#o {
+    grid-area: O;
+}
+
+.submit-player-info {
+    grid-area: submit;
+    width:100%;
+    height:50px;
+    font-size:1.2rem;
+    font-weight:bold;
+    border:1px solid black;
+    border-radius: 1rem;
+    cursor:pointer;
+    background-color: rgb(205, 205, 205);
+}
+
+.submit-player-info:hover {
+    background-color: rgb(133, 133, 133);
+}
+
+.submit-player-info:active {
+    transform: scale(0.95);
+}
+
+#player2-info {
+    grid-template-areas:
+    "title title"
+    "label label"
+    "input input"
+    "X O"
+    "submit submit";
+    gap:20px;
+    width:100%;
+    padding:30px;
+    /* set to grid */
+    display:none;
+}
+
+#player2-info > h3 {
+    grid-area: title;
+    text-align: center;
+    font-size:1.2rem;
+}
+
+#player2-info > label {
+    grid-area: label;
+    font-size:1.1rem;
+    text-align: center;
+}
+
+.mark-select-btn {
+    font-size:4rem;
+    font-weight:bold;
+    width:200px;
+    height:200px;
+    padding:10px 20px;
+    border:1px solid black;
+    border-radius: 1rem;
+    cursor:pointer;
+    background-color: rgb(205, 205, 205);
+}
+
+.mark-select-btn:hover {
+    background-color: rgb(133, 133, 133);
+}
+
+.mark-select-btn:active {
+    transform: scale(0.95);
+}
+
 #tile-container {
     width: 300px;
     height: 300px;
-    display: grid;
     grid-template-columns: 1fr 1fr 1fr;
     grid-template-rows: 1fr 1fr 1fr;
+    /* set to grid */
+    display:none;
 }
 
 .tile {

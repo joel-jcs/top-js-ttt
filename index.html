@@ -9,6 +9,30 @@
 <body>
     <div id="game-container">
         <h1>Tic Tac Toe</h1>
+        <div id="mode-select-screen">
+            <h2>Select Mode:</h2>
+            <div id="mode-btn-container">
+                <button type="button" class="mode-btn" value="1">Player vs AI</button>
+                <button type="button" class="mode-btn" value="2">Player vs Player</button>
+            </div>
+        </div>
+        <div id="player-options-screen">
+            <h2>Player Options</h2>
+            <form id="player1-info">
+                <h3>Player 1</h3>
+                <label for="player1-name">Name:</label>
+                <input type="text" id="player1-name" class="player-name-input">
+                <button class="mark-select-btn" type="button" id="X">X</button>
+                <button class="mark-select-btn" type="button" id="O">O</button>
+                <button id="submit-player1-info" class="submit-player-info" type="button">Submit</button>
+            </form>
+            <form id="player2-info">
+                <h3>Player 2</h3>
+                <label for="player2-name">Name:</label>
+                <input type="text" id="player2-name" class="player-name-input">
+                <button id="submit-player2-info" class="submit-player-info" type="button">Submit</button>
+            </form>
+        </div>
         <div id="tile-container"></div>
     </div>
     <script src="script.js"></script>
