@@ -67,8 +67,13 @@ const players = (() => {
                         marks[index].classList.remove("hover");
                         
                         console.log(currPlayer.selections);
+
+                        if (currPlayer.selections.length > 2) {
+                            players.checkWinner(currPlayer);
+                        }
+
                         gameHandler().playTurn(currPlayer, opponent);
-    
+
                     } else {
                         alert("That cell is already selected. Try again.");
                     }
@@ -206,44 +211,23 @@ const gameUI = (() => {
 })();
 
 const gameHandler = function () {
-    // let { player1, player2 } = gameUI.onboardingFlow;
     
     const playTurn = (player1, player2) => {
+        if (gameboard.getRemainingCells().length === 0 && (!player1.isWinner && !player2.isWinner)) {
+            alert("The game ended in a tie.");
+        }
+
         if (!player1.selectionMade) {
-            console.log("player1 selecting...")
             players.getPlayerSelection(player1, player2);
         } else {
-            console.log("player2 selecting...")
-            players.getPlayerSelection(player2, player1);
+            if (gameboard.getRemainingCells().length > 0 && !player1.isWinner) {
+                players.getPlayerSelection(player2, player1);
+            }
         }
     };
 
-    // playTurn()
 
-    const playGame = () => {
-        // while (gameboard.getRemainingCells().length > 0) {
-        //     if (player1.isWinner || player2.isWinner) {
-        //         console.table(player1.selections);
-        //         console.table(player2.selections);
-        //         break;
-        //     }
-    
-            playTurn(player1);
-            // if (player1.selections.length > 2) {
-            //     players.checkWinner(player1);
-            // }
-            if (gameboard.getRemainingCells().length > 0 && !player1.isWinner) {
-                playTurn(player2);
-                if (player2.selections.length > 2) {
-                    players.checkWinner(player2);
-                }
-            }
-        // }
-
-        // if (!player1.isWinner && !player2.isWinner) {
-        //     alert("The game ended in a tie.");
-        // }
-
+    const playGame = (player1, player2) => {
         // const restartGame = () => {
         //     gameboard.clearBoard();
         //     player1.isWinner = false;
@@ -264,9 +248,7 @@ const gameHandler = function () {
         // }
     }
     
-    // playGame();
-
     return {
-        playTurn,
+        playTurn, 
     }
 };
