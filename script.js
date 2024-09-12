@@ -1,3 +1,12 @@
+const player1NameInput = document.getElementById('player1-name');
+const player2NameInput = document.getElementById('player2-name');
+const markSelectBtn = document.querySelectorAll('.mark-select-btn');
+const playerOptionsScreen = document.getElementById('player-options-screen');
+const player1InfoScreen = document.getElementById('player1-info');
+const player2InfoScreen = document.getElementById('player2-info');
+const submitPlayer1InfoBtn = document.getElementById('submit-player1-info');
+const submitPlayer2InfoBtn = document.getElementById('submit-player2-info');
+
 const gameboard = (() => {
     const cells = [1, 2, 3, 4, 5, 6, 7, 8, 9];
     
@@ -19,7 +28,7 @@ const gameboard = (() => {
     };
 })();
 
-const gameUI = (() => {
+const gameUI = () => {
     const gameContainer = document.getElementById('game-container');
     const tileContainer = document.getElementById('tile-container');
     
@@ -33,45 +42,7 @@ const gameUI = (() => {
         });
     };
 
-    return { tileContainer, setTileContainer };
-})();
-
-const players = (() => {
-    
-    const playerOptionsScreen = document.getElementById('player-options-screen');
-    let playerQty = 0;
-    const getPlayerQty = () => {
-        const modeSelectScreen = document.getElementById('mode-select-screen');
-        const modeBtn = document.querySelectorAll('.mode-btn');
-        modeBtn.forEach(btn => {
-            btn.addEventListener('click', () => {
-                playerQty = btn.value;
-                modeSelectScreen.style.display = 'none';
-                playerOptionsScreen.style.display = 'flex';
-                console.log(playerQty);
-            })
-        })
-        return playerQty;
-    };
-    
-
-
-
-    const createPlayer = (name, mark) => {
-        return { name, mark, selections: [], selectionMade:false, isWinner: false };
-    };
-
-    const setPlayers = (playerQty) => {
-        // let player1Name = prompt("Enter the name of the first player (Player 1): ");
-        // let player1Mark = prompt("Choose a mark (X or O): ");
-
-        const player1NameInput = document.getElementById('player1-name');
-        const player2NameInput = document.getElementById('player2-name');
-        const markSelectBtn = document.querySelectorAll('.mark-select-btn');
-        const player1InfoScreen = document.getElementById('player1-info');
-        const player2InfoScreen = document.getElementById('player2-info');
-        const submitPlayer1InfoBtn = document.getElementById('submit-player1-info');
-        const submitPlayer2InfoBtn = document.getElementById('submit-player2-info');
+    const onboardingFlow = (playerQty) => {
 
         let player1;
         let player2;
@@ -95,7 +66,7 @@ const players = (() => {
                 player1NameInput.value = "Player1";
             }
             player1Name = player1NameInput.value;
-            player1 = createPlayer(player1Name, player1Mark);
+            player1 = players.createPlayer(player1Name, player1Mark);
             player1InfoScreen.style.display = 'none';
             player2InfoScreen.style.display = 'grid';
             console.table(player1);
@@ -108,20 +79,50 @@ const players = (() => {
             player2Name = player2NameInput.value;
             player2InfoScreen.style.display = 'none';
             player2Mark = player1.mark === "X" ? "O" : "X";
-            player2 = createPlayer(player2Name, player2Mark);
+            player2 = players.createPlayer(player2Name, player2Mark);
             playerOptionsScreen.style.display = 'none';
-            gameUI.tileContainer.style.display = 'grid';
-            gameUI.setTileContainer();
+            gameUI().tileContainer.style.display = 'grid';
+            gameUI().setTileContainer();
             console.table(player2);
         })
 
         //player 2 set to CPU if the user selected 1 player. If 2 players, gets name from player2;
         
         // let player2 = playerQty < 2 ? createPlayer("CPU", player2Mark) : createPlayer(prompt("Enter the name of the second player (Player 2): "), player2Mark);
-        player2 = playerQty < 2 ? createPlayer("CPU", player2Mark) : createPlayer("Player2", player2Mark);
+        player2 = playerQty < 2 ? players.createPlayer("CPU", player2Mark) : players.createPlayer("Player2", player2Mark);
 
         return { player1, player2 };
     };
+
+    return { tileContainer, setTileContainer, onboardingFlow };
+};
+
+const players = (() => {
+    
+    let playerQty = 0;
+    const getPlayerQty = () => {
+        const modeSelectScreen = document.getElementById('mode-select-screen');
+        const modeBtn = document.querySelectorAll('.mode-btn');
+        modeBtn.forEach(btn => {
+            btn.addEventListener('click', () => {
+                playerQty = btn.value;
+                modeSelectScreen.style.display = 'none';
+                playerOptionsScreen.style.display = 'flex';
+                console.log(playerQty);
+            })
+        })
+        return playerQty;
+    };
+    
+    // TO-DO: If playerQty = 1, need set players to set player 2 as CPU.
+    // also need to handle this in the gameHandler function
+
+
+    const createPlayer = (name, mark) => {
+        return { name, mark, selections: [], selectionMade:false, isWinner: false };
+    };
+
+    
 
     const getPlayerSelection = (currPlayer, opponent) => {
         const tiles = document.querySelectorAll('.tile');
@@ -156,7 +157,7 @@ const players = (() => {
                         marks[index].classList.remove("hover");
                         
                         console.log(currPlayer.selections);
-                        playGame.playTurn();
+                        gameHandler.playTurn();
     
                     } else {
                         alert("That cell is already selected. Try again.");
@@ -199,34 +200,33 @@ const players = (() => {
     return { 
         getPlayerQty,
         createPlayer,
-        setPlayers,
         getPlayerSelection,
         getCpuSelection,
         checkWinner,
         clearSelections,
     }
 })();
-players.getPlayerQty();
 
-const playGame = (function () {
+const gameHandler = (function () {
     let playerQty = players.getPlayerQty();
     
     // testing
-    let { player1, player2 } = players.setPlayers(playerQty);
+    let { player1, player2 } = gameUI().onboardingFlow(playerQty);
     console.log(player1, player2);
 
     
-    // const playTurn = () => {
-    //     if (!player1.selectionMade) {
-    //         console.log("player1 selecting...")
-    //         players.getPlayerSelection(player1, player2);
-    //     } else {
-    //         console.log("player2 selecting...")
-    //         players.getPlayerSelection(player2, player1);
-    //     }
-    // };
+    
+    const playTurn = () => {
+        if (!player1.selectionMade) {
+            console.log("player1 selecting...")
+            players.getPlayerSelection(player1, player2);
+        } else {
+            console.log("player2 selecting...")
+            players.getPlayerSelection(player2, player1);
+        }
+    };
 
-    // playTurn()
+    playTurn()
 
     const playGame = () => {
         // while (gameboard.getRemainingCells().length > 0) {
