@@ -1,4 +1,6 @@
 const gameContainer = document.getElementById('game-container');
+const modeSelectScreen = document.getElementById('mode-select-screen');
+const modeBtn = document.querySelectorAll('.mode-btn');
 const player1NameInput = document.getElementById('player1-name');
 const player2NameInput = document.getElementById('player2-name');
 const markSelectBtn = document.querySelectorAll('.mark-select-btn');
@@ -18,7 +20,7 @@ const gameboard = (() => {
         remainingCells = remainingCells.filter(filtering);
     };
 
-    const clearBoard = () => {
+    const reset = () => {
         remainingCells = cells.map(cell => cell);
     };
 
@@ -26,12 +28,11 @@ const gameboard = (() => {
         cells,
         getRemainingCells,
         updateRemainingCells,
-        clearBoard,
+        reset,
     };
 })();
 
 const players = (() => {
-    
     const createPlayer = (name, mark) => {
         return { name, mark, selections: [], selectionMade: false, isWinner: false };
     };
@@ -55,20 +56,15 @@ const players = (() => {
         });
     };
 
-    const clearSelections = (player1, player2) => {
-        player1.selections = [];
-        player2.selections = [];
-    }
-
     return { 
         createPlayer,
         checkWinner,
-        clearSelections,
     }
 })();
 
 const gameUI = (() => {
     const setTileContainer = () => {
+        tileContainer.innerHTML = '';
         gameboard.cells.forEach(cell => {
             tileContainer.innerHTML += `
             <div class="tile">
@@ -78,11 +74,7 @@ const gameUI = (() => {
         });
     };
 
-    const onboardingFlow = (() => {
-
-        const modeSelectScreen = document.getElementById('mode-select-screen');
-        const modeBtn = document.querySelectorAll('.mode-btn');
-        
+    const onboardingFlow = () => {
         let playerQty;
         modeBtn.forEach(btn => {
             btn.addEventListener('click', () => {
@@ -135,7 +127,7 @@ const gameUI = (() => {
                 playerOptionsScreen.style.display = 'none';
                 setTileContainer();
                 tileContainer.style.display = 'grid';
-                gameHandler().playTurn(player1, player2, playerQty);
+                gameHandler.playTurn(player1, player2, playerQty);
             });
         };
 
@@ -146,12 +138,12 @@ const gameUI = (() => {
             setTileContainer();
             tileContainer.style.display = 'grid';
             console.table(player2);
-            gameHandler().playTurn(player1, player2, playerQty);
+            gameHandler.playTurn(player1, player2, playerQty);
         };
         return {
             playerQty,
         }
-    })();
+    };
 
     const getPlayerSelection = (currPlayer, opponent, playerQty) => {
         const tiles = document.querySelectorAll('.tile');
@@ -188,7 +180,7 @@ const gameUI = (() => {
                         if (currPlayer.selections.length > 2) {
                             players.checkWinner(currPlayer);
                         }
-                        gameHandler().playTurn(currPlayer, opponent, playerQty);
+                        gameHandler.playTurn(currPlayer, opponent, playerQty);
 
                     } else {
                         alert("That cell is already selected. Try again.");
@@ -216,13 +208,18 @@ const gameUI = (() => {
             players.checkWinner(player2);
         }
 
-        gameHandler().playTurn(player1, player2);
+        gameHandler.playTurn(player1, player2);
     };
 
 
     // TODO: need to add a "Restart?" button. clicking it will restart the game and clear up all selections, reset tilecontainer, and reset remainingcells
     const endGame = (player1, player2) => {
+        const tiles = document.querySelectorAll('.tile');
+        const marks = document.querySelectorAll('.mark');
         const gameEndElement = document.createElement('h3');
+        const restartBtn = document.createElement('button');
+        restartBtn.id = 'restart-btn';
+        restartBtn.textContent = "Restart";
 
         let winner;
         if (player1.isWinner || player2.isWinner) {
@@ -230,13 +227,33 @@ const gameUI = (() => {
         }
         
         if (winner) {
-            gameEndElement.textContent = `${winner} is the winner!`;    
+            gameEndElement.textContent = `
+            ${winner} is the winner!
+            
+            Restart game?
+            `;    
         } else {
-            gameEndElement.textContent = `The game ended in a tie.`;
+            gameEndElement.textContent = `The game ended in a tie.
+            
+            Restart game?`;
         }
-        gameContainer.innerHTML = `<h1>Tic Tac Toe</h1>`;
-        gameContainer.appendChild(gameEndElement);
-        gameContainer.appendChild(tileContainer);
+
+        gameContainer.insertBefore(gameEndElement, tileContainer);
+        gameContainer.insertBefore(restartBtn, tileContainer);
+
+        restartBtn.addEventListener('click', () => {
+            gameboard.reset();
+            gameEndElement.remove();
+            restartBtn.remove();
+
+            tileContainer.style.display = "none";
+            
+            modeSelectScreen.style.display = "flex";
+            player1InfoScreen.style.display = "grid";
+            player1 = {};
+            player2 = {};
+            gameUI.onboardingFlow();
+        });
     }
 
     return { 
@@ -248,7 +265,9 @@ const gameUI = (() => {
      };
 })();
 
-const gameHandler = function () {
+const gameHandler = (function () {
+
+    gameUI.onboardingFlow();
     
     const playTurn = (player1, player2, playerQty) => {
         if (playerQty === 2 ) {
@@ -278,29 +297,7 @@ const gameHandler = function () {
         }
     };
 
-
-    // const playGame = (player1, player2) => {
-        // const restartGame = () => {
-        //     gameboard.clearBoard();
-        //     player1.isWinner = false;
-        //     player2.isWinner = false;
-        //     player1.selections = [];
-        //     player2.selections = [];
-    
-        //     playGame();
-        // }
-
-        // let restart = prompt("Would you like to play again? (y/n) ");
-        // if (restart.toLowerCase().match(/y|yes/i)) {
-        //     restartGame();
-        // } else if (restart.toLowerCase().match(/n|no/i)) {
-        //     alert("Thanks for playing!")
-        // } else {
-        //     return;
-        // }
-    // }
-    
     return {
         playTurn, 
     }
-};
+})();
