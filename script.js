@@ -92,7 +92,6 @@ const gameUI = (() => {
             })
         })
             
-        console.log("onboarding flow...")
         let player1;
         let player2;
         let player1Mark = "";
@@ -117,10 +116,8 @@ const gameUI = (() => {
             player1 = players.createPlayer(player1Name, player1Mark);
             player1InfoScreen.style.display = 'none';
             if (playerQty === 1) {
-                console.log("create CPU");
                 createCPU();
             } else if (playerQty === 2){
-                console.log("create player 2");
                 createPlayer2();
             }
         })
@@ -175,9 +172,9 @@ const gameUI = (() => {
             });
 
             tile.addEventListener('click', () => {
+                let remainingCells = gameboard.getRemainingCells();
                 if (!isClicked){
-                    if (gameboard.getRemainingCells().includes(index)) {
-                        console.log("player1 selection", index)
+                    if (remainingCells.includes(index)) {
                         currPlayer.selections.push(index);
                         currPlayer.selectionMade = !currPlayer.selectionMade;
                         opponent.selectionMade = false;
@@ -201,25 +198,19 @@ const gameUI = (() => {
         });
     }
 
-    // TODO: Need to update getCPU, currently can select a cell that's already selected
     const getCpuSelection = (player1, player2) => {
         const marks = document.querySelectorAll('.mark');
         const remainingCells = gameboard.getRemainingCells();
 
-        let index = Math.floor(Math.random() * remainingCells.length);
+        let index = remainingCells[Math.floor(Math.random() * remainingCells.length)];
 
-        console.log("remaining cells before cpu",remainingCells);
-        console.log("cpu index selected", typeof index, index);
-        
         player2.selections.push(index);
-        console.log("p2 selections",player2.selections);
         player2.selectionMade = !player2.selectionMade;
         player1.selectionMade = false;
 
         gameboard.updateRemainingCells(cell => !player2.selections.includes(cell));
         marks[index].textContent = `${player2.mark}`;
         marks[index].classList.add("active");
-        console.log("remaining cells after cpu",remainingCells);
 
         if (player2.selections.length > 2) {
             players.checkWinner(player2);
