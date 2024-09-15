@@ -37,6 +37,14 @@ const PlayerManager = (() => {
         return { name, mark, selections: [], selectionMade: false, isWinner: false };
     };
 
+    let playerQty;
+    const setPlayerQty = (value) => {
+        playerQty = parseInt(value);
+        console.log("Player qty: " + playerQty);
+    }
+
+    const getPlayerQty = () => playerQty;
+
     const checkWinner = (player) => {
         let playerSelections = player.selections.sort((a,b) => a - b);
     
@@ -49,20 +57,25 @@ const PlayerManager = (() => {
         winningCombinations.forEach(combination => {
             if (combination.every(num => playerSelections.includes(num))) {
                 player.isWinner = true;
-                GameManager.endGame(player);
-                return;
             }
         });
+
+        if (player.isWinner) {
+            GameManager.endGame(player);
+            return;
+        }
     };
 
     return { 
         createPlayer,
+        setPlayerQty,
+        getPlayerQty,
         checkWinner,
     }
 })();
 
 const UIManager = (() => {
-    const createBoard = () => {
+    const boardSetup = () => {
         tileContainer.innerHTML = '';
         GameBoard.boardCells.forEach(cell => {
             tileContainer.innerHTML += `
@@ -74,28 +87,24 @@ const UIManager = (() => {
     };
 
     const onboardingFlow = () => {
+        //select mode (vs CPU || 2 players)
         let playerQty;
         modeBtn.forEach(btn => {
             btn.addEventListener('click', () => {
-                playerQty = parseInt(btn.value);
                 modeSelectScreen.style.display = 'none';
                 playerOptionsScreen.style.display = 'flex';
+                PlayerManager.setPlayerQty(btn.value);
+                playerQty = PlayerManager.getPlayerQty();
             })
         })
-            
+        
+        // create player 1
         let player1;
-        let player2;
         let player1Mark = "";
         let player1Name = "";
-        let player2Mark = "";
-        let player2Name = "";
         markSelectBtn.forEach(btn => {
             btn.addEventListener('click', () => {
-                if (btn.id === 'X') {
-                    player1Mark = 'X';
-                } else {
-                    player1Mark = 'O';
-                }
+                player1Mark = btn.id;
             })
         })
 
@@ -106,13 +115,18 @@ const UIManager = (() => {
             player1Name = player1NameInput.value;
             player1 = PlayerManager.createPlayer(player1Name, player1Mark);
             player1InfoScreen.style.display = 'none';
+
+            // this onboarding flow step creates player 2 depending on selected mode
             if (playerQty === 1) {
                 createCPU();
             } else if (playerQty === 2){
                 createPlayer2();
             }
         })
-
+        
+        let player2;
+        let player2Mark = "";
+        let player2Name = "";
         const createPlayer2 = () => {
             player2InfoScreen.style.display = 'grid';
             submitPlayer2InfoBtn.addEventListener('click', () => {
@@ -124,7 +138,7 @@ const UIManager = (() => {
                 player2Mark = player1.mark === "X" ? "O" : "X";
                 player2 = PlayerManager.createPlayer(player2Name, player2Mark);
                 playerOptionsScreen.style.display = 'none';
-                createBoard();
+                boardSetup();
                 tileContainer.style.display = 'grid';
                 GameManager.playTurn(player1, player2, playerQty);
             });
@@ -134,13 +148,10 @@ const UIManager = (() => {
             player2Mark = player1.mark === "X" ? "O" : "X";
             player2 = PlayerManager.createPlayer("CPU", player2Mark);
             playerOptionsScreen.style.display = 'none';
-            createBoard();
+            boardSetup();
             tileContainer.style.display = 'grid';
             GameManager.playTurn(player1, player2, playerQty);
         };
-        return {
-            playerQty,
-        }
     };
 
     const getPlayerSelection = (currPlayer, opponent, playerQty) => {
@@ -211,7 +222,7 @@ const UIManager = (() => {
 
 
     return { 
-        createBoard, 
+        boardSetup, 
         onboardingFlow,
         getPlayerSelection,
         getCpuSelection,
@@ -221,10 +232,11 @@ const UIManager = (() => {
 const GameManager = (function () {
 
     const startGame = (() => {
-        UIManager.onboardingFlow();    
+        UIManager.onboardingFlow();
     })();
     
     const playTurn = (player1, player2, playerQty) => {
+        //handles turns, player vs player
         if (playerQty === 2 ) {
             if (GameBoard.getRemainingCells().length === 0 && (!player1.isWinner && !player2.isWinner)) {
                 GameManager.endGame(player1, player2);
@@ -237,6 +249,7 @@ const GameManager = (function () {
                     UIManager.getPlayerSelection(player2, player1, playerQty);
                 }
             }
+            // handles turns, player vs computer
         } else {
             if (GameBoard.getRemainingCells().length === 0 && (!player1.isWinner && !player2.isWinner)) {
                 GameManager.endGame(player1, player2);
@@ -261,17 +274,16 @@ const GameManager = (function () {
 
         let winner;
         if (player1.isWinner || player2.isWinner) {
-            winner = player1.isWinner ? player1.name : player2.name;    
+            winner = player1.isWinner ? player1.name : player2.name;
         }
         
         if (winner) {
-            gameEndElement.textContent = `
+            gameEndElement.textContent = winner ? `
             ${winner} is the winner!
             
             Restart game?
-            `;    
-        } else {
-            gameEndElement.textContent = `The game ended in a tie.
+            `: 
+            `The game ended in a tie.
             
             Restart game?`;
         }
@@ -281,6 +293,7 @@ const GameManager = (function () {
 
         restartBtn.addEventListener('click', () => {
             GameBoard.resetRemainingCells();
+            gameEndElement.textContent = "";
             gameEndElement.remove();
             restartBtn.remove();
 
@@ -290,6 +303,7 @@ const GameManager = (function () {
             player1InfoScreen.style.display = "grid";
             player1 = {};
             player2 = {};
+            winner = "";
             UIManager.startGame;
         });
     }
