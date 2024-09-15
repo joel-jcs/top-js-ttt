@@ -11,32 +11,31 @@ const submitPlayer1InfoBtn = document.getElementById('submit-player1-info');
 const submitPlayer2InfoBtn = document.getElementById('submit-player2-info');
 const tileContainer = document.getElementById('tile-container');
 
-const gameboard = (() => {
-    const cells = [0, 1, 2, 3, 4, 5, 6, 7, 8];
+const GameBoard = (() => {
+    const boardCells = [0, 1, 2, 3, 4, 5, 6, 7, 8];
     
-    let remainingCells = cells.map(cell => cell);
+    let remainingCells = boardCells.map(cell => cell);
     const getRemainingCells = () => remainingCells;
     const updateRemainingCells = (filtering) => {
         remainingCells = remainingCells.filter(filtering);
     };
 
-    const reset = () => {
-        remainingCells = cells.map(cell => cell);
+    const resetRemainingCells = () => {
+        remainingCells = boardCells.map(cell => cell);
     };
 
     return  {
-        cells,
+        boardCells,
         getRemainingCells,
         updateRemainingCells,
-        reset,
+        resetRemainingCells,
     };
 })();
 
-const players = (() => {
+const PlayerManager = (() => {
     const createPlayer = (name, mark) => {
         return { name, mark, selections: [], selectionMade: false, isWinner: false };
     };
-
 
     const checkWinner = (player) => {
         let playerSelections = player.selections.sort((a,b) => a - b);
@@ -50,7 +49,7 @@ const players = (() => {
         winningCombinations.forEach(combination => {
             if (combination.every(num => playerSelections.includes(num))) {
                 player.isWinner = true;
-                gameUI.endGame(player);
+                GameManager.endGame(player);
                 return;
             }
         });
@@ -62,10 +61,10 @@ const players = (() => {
     }
 })();
 
-const gameUI = (() => {
-    const setTileContainer = () => {
+const UIManager = (() => {
+    const createBoard = () => {
         tileContainer.innerHTML = '';
-        gameboard.cells.forEach(cell => {
+        GameBoard.boardCells.forEach(cell => {
             tileContainer.innerHTML += `
             <div class="tile">
                 <span class="mark"></span>
@@ -105,7 +104,7 @@ const gameUI = (() => {
                 player1NameInput.value = "Player1";
             }
             player1Name = player1NameInput.value;
-            player1 = players.createPlayer(player1Name, player1Mark);
+            player1 = PlayerManager.createPlayer(player1Name, player1Mark);
             player1InfoScreen.style.display = 'none';
             if (playerQty === 1) {
                 createCPU();
@@ -123,22 +122,21 @@ const gameUI = (() => {
                 player2Name = player2NameInput.value;
                 player2InfoScreen.style.display = 'none';
                 player2Mark = player1.mark === "X" ? "O" : "X";
-                player2 = players.createPlayer(player2Name, player2Mark);
+                player2 = PlayerManager.createPlayer(player2Name, player2Mark);
                 playerOptionsScreen.style.display = 'none';
-                setTileContainer();
+                createBoard();
                 tileContainer.style.display = 'grid';
-                gameHandler.playTurn(player1, player2, playerQty);
+                GameManager.playTurn(player1, player2, playerQty);
             });
         };
 
         const createCPU = () => {
             player2Mark = player1.mark === "X" ? "O" : "X";
-            player2 = players.createPlayer("CPU", player2Mark);
+            player2 = PlayerManager.createPlayer("CPU", player2Mark);
             playerOptionsScreen.style.display = 'none';
-            setTileContainer();
+            createBoard();
             tileContainer.style.display = 'grid';
-            console.table(player2);
-            gameHandler.playTurn(player1, player2, playerQty);
+            GameManager.playTurn(player1, player2, playerQty);
         };
         return {
             playerQty,
@@ -164,7 +162,7 @@ const gameUI = (() => {
             });
 
             tile.addEventListener('click', () => {
-                let remainingCells = gameboard.getRemainingCells();
+                let remainingCells = GameBoard.getRemainingCells();
                 if (!isClicked){
                     if (remainingCells.includes(index)) {
                         currPlayer.selections.push(index);
@@ -172,15 +170,15 @@ const gameUI = (() => {
                         opponent.selectionMade = false;
                         isClicked = true;
     
-                        gameboard.updateRemainingCells(cell => !currPlayer.selections.includes(cell));
+                        GameBoard.updateRemainingCells(cell => !currPlayer.selections.includes(cell));
                         marks[index].textContent = `${currPlayer.mark}`;
                         marks[index].classList.add("active");
                         marks[index].classList.remove("hover");
                         
                         if (currPlayer.selections.length > 2) {
-                            players.checkWinner(currPlayer);
+                            PlayerManager.checkWinner(currPlayer);
                         }
-                        gameHandler.playTurn(currPlayer, opponent, playerQty);
+                        GameManager.playTurn(currPlayer, opponent, playerQty);
 
                     } else {
                         alert("That cell is already selected. Try again.");
@@ -192,7 +190,7 @@ const gameUI = (() => {
 
     const getCpuSelection = (player1, player2) => {
         const marks = document.querySelectorAll('.mark');
-        const remainingCells = gameboard.getRemainingCells();
+        const remainingCells = GameBoard.getRemainingCells();
 
         let index = remainingCells[Math.floor(Math.random() * remainingCells.length)];
 
@@ -200,22 +198,62 @@ const gameUI = (() => {
         player2.selectionMade = !player2.selectionMade;
         player1.selectionMade = false;
 
-        gameboard.updateRemainingCells(cell => !player2.selections.includes(cell));
+        GameBoard.updateRemainingCells(cell => !player2.selections.includes(cell));
         marks[index].textContent = `${player2.mark}`;
         marks[index].classList.add("active");
 
         if (player2.selections.length > 2) {
-            players.checkWinner(player2);
+            PlayerManager.checkWinner(player2);
         }
 
-        gameHandler.playTurn(player1, player2);
+        GameManager.playTurn(player1, player2);
     };
 
 
-    // TODO: need to add a "Restart?" button. clicking it will restart the game and clear up all selections, reset tilecontainer, and reset remainingcells
+    return { 
+        createBoard, 
+        onboardingFlow,
+        getPlayerSelection,
+        getCpuSelection,
+     };
+})();
+
+const GameManager = (function () {
+
+    const startGame = (() => {
+        UIManager.onboardingFlow();    
+    })();
+    
+    const playTurn = (player1, player2, playerQty) => {
+        if (playerQty === 2 ) {
+            if (GameBoard.getRemainingCells().length === 0 && (!player1.isWinner && !player2.isWinner)) {
+                GameManager.endGame(player1, player2);
+            }
+            
+            if (!player1.selectionMade) {
+                UIManager.getPlayerSelection(player1, player2, playerQty);
+            } else {
+                if (GameBoard.getRemainingCells().length > 0 && !player1.isWinner) {
+                    UIManager.getPlayerSelection(player2, player1, playerQty);
+                }
+            }
+        } else {
+            if (GameBoard.getRemainingCells().length === 0 && (!player1.isWinner && !player2.isWinner)) {
+                GameManager.endGame(player1, player2);
+            }
+    
+            if (!player1.selectionMade) {
+                UIManager.getPlayerSelection(player1, player2);
+            } else {
+                if (GameBoard.getRemainingCells().length > 0 && !player1.isWinner) {
+                    UIManager.getCpuSelection(player1, player2);
+                }
+            }
+        }
+    };
+
+
     const endGame = (player1, player2) => {
-        const tiles = document.querySelectorAll('.tile');
-        const marks = document.querySelectorAll('.mark');
         const gameEndElement = document.createElement('h3');
         const restartBtn = document.createElement('button');
         restartBtn.id = 'restart-btn';
@@ -242,7 +280,7 @@ const gameUI = (() => {
         gameContainer.insertBefore(restartBtn, tileContainer);
 
         restartBtn.addEventListener('click', () => {
-            gameboard.reset();
+            GameBoard.resetRemainingCells();
             gameEndElement.remove();
             restartBtn.remove();
 
@@ -252,52 +290,13 @@ const gameUI = (() => {
             player1InfoScreen.style.display = "grid";
             player1 = {};
             player2 = {};
-            gameUI.onboardingFlow();
+            UIManager.startGame;
         });
     }
 
-    return { 
-        setTileContainer, 
-        onboardingFlow,
-        getPlayerSelection,
-        getCpuSelection,
-        endGame,
-     };
-})();
-
-const gameHandler = (function () {
-
-    gameUI.onboardingFlow();
-    
-    const playTurn = (player1, player2, playerQty) => {
-        if (playerQty === 2 ) {
-            if (gameboard.getRemainingCells().length === 0 && (!player1.isWinner && !player2.isWinner)) {
-                gameUI.endGame(player1, player2);
-            }
-            
-            if (!player1.selectionMade) {
-                gameUI.getPlayerSelection(player1, player2, playerQty);
-            } else {
-                if (gameboard.getRemainingCells().length > 0 && !player1.isWinner) {
-                    gameUI.getPlayerSelection(player2, player1, playerQty);
-                }
-            }
-        } else {
-            if (gameboard.getRemainingCells().length === 0 && (!player1.isWinner && !player2.isWinner)) {
-                gameUI.endGame(player1, player2);
-            }
-    
-            if (!player1.selectionMade) {
-                gameUI.getPlayerSelection(player1, player2);
-            } else {
-                if (gameboard.getRemainingCells().length > 0 && !player1.isWinner) {
-                    gameUI.getCpuSelection(player1, player2);
-                }
-            }
-        }
-    };
-
     return {
-        playTurn, 
+        startGame,
+        playTurn,
+        endGame,
     }
 })();
